@@ -1,5 +1,6 @@
 services:
   agent:
+    image: ${DOCKERHUB_USERNAME:-your-dockerhub-username}/learn-claude-code-agent:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -10,6 +11,7 @@ services:
     command: python agents/s_full.py
 
   web:
+    image: ${DOCKERHUB_USERNAME:-your-dockerhub-username}/learn-claude-code-web:latest
     build:
       context: .
       dockerfile: web/Dockerfile
