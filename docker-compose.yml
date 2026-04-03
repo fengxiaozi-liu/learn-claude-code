@@ -1,0 +1,84 @@
+# =============================================================================
+# learn-claude-code docker-compose.yml
+# =============================================================================
+# Start the full stack (web + agents):
+#   cp .env.example .env
+#   # edit .env and fill in your ANTHROPIC_API_KEY
+#   docker-compose up -d
+#
+# Start web only:
+#   docker-compose up -d web
+#
+# Start agents only:
+#   docker-compose up -d agents
+#
+# Tail logs:
+#   docker-compose logs -f
+# =============================================================================
+
+services:
+  # ── Next.js Web Frontend ──────────────────────────────────────────────────
+  web:
+    build:
+      context: .
+      target: runtime
+    container_name: learn-claude-code-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      # Hot-reload support during development
+      - ./web/src:/app/web/src:ro
+      - ./web/public:/app/web/public:ro
+    environment:
+      - WEB_DIR=/app/web
+      - PYTHONPATH=/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    depends_on:
+      - agents
+
+  # ── Python Agents ─────────────────────────────────────────────────────────
+  agents:
+    build:
+      context: .
+      target: agents
+    container_name: learn-claude-code-agents
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      # Mount agents and skills for development hot-reload
+      - ./agents:/app/agents:ro
+      - ./skills:/app/skills:ro
+    environment:
+      - PYTHONPATH=/app
+    command: ["python", "agents/s_full.py"]
+
+  # ── Optional: Jupyter for interactive development ─────────────────────────
+  jupyter:
+    build:
+      context: .
+      target: agents
+    container_name: learn-claude-code-jupyter
+    restart: no
+    ports:
+      - "8888:8888"
+    env_file:
+      - .env
+    volumes:
+      - ./agents:/app/agents:ro
+      - ./skills:/app/skills:ro
+    environment:
+      - PYTHONPATH=/app
+    command: ["jupyter", "notebook", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
+
+networks:
+  default:
+    name: learn-claude-code-net

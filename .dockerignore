@@ -1,0 +1,41 @@
+# Git
+.git
+.gitignore
+
+# Docker files (not needed inside image)
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Environment files (should be passed via env_file)
+.env
+.env.*
+!.env.example
+
+# Node.js build artifacts
+web/.next
+web/node_modules
+
+# Python cache
+__pycache__
+*.py[cod]
+*.egg-info
+.eggs
+.pytest_cache
+
+# Docs
+*.md
+!README.md
+docs
+
+# Tests (keep tests dir but skip heavy test files)
+tests
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode
+.idea
+*.swp
