@@ -1,19 +1,8 @@
 services:
-  agent:
-    image: ${DOCKERHUB_USERNAME:-your-dockerhub-username}/learn-claude-code-agent:latest
+  web:
+    image: ${WEB_IMAGE:fengxiaozi/learn-claude-code-web:latest}
     build:
       context: .
       dockerfile: Dockerfile
-    env_file:
-      - .env
-    stdin_open: true
-    tty: true
-    command: python agents/s_full.py
-
-  web:
-    image: ${DOCKERHUB_USERNAME:-your-dockerhub-username}/learn-claude-code-web:latest
-    build:
-      context: .
-      dockerfile: web/Dockerfile
     ports:
       - "3000:80"

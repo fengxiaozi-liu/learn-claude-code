@@ -11,58 +11,58 @@ interface MessageBlock {
 }
 
 const PARENT_BASE_MESSAGES: MessageBlock[] = [
-  { id: "p1", label: "user: Build login + tests", color: "bg-blue-500" },
-  { id: "p2", label: "assistant: Planning approach...", color: "bg-zinc-600" },
-  { id: "p3", label: "tool_result: project structure", color: "bg-emerald-500" },
+  { id: "p1", label: "user: 构建登录功能并补测试", color: "bg-blue-500" },
+  { id: "p2", label: "assistant: 正在规划实现方案...", color: "bg-zinc-600" },
+  { id: "p3", label: "tool_result: 项目目录结构", color: "bg-emerald-500" },
 ];
 
 const TASK_PROMPT: MessageBlock = {
   id: "task",
-  label: "task: Write unit tests for auth",
+  label: "task: 为认证模块编写单元测试",
   color: "bg-purple-500",
 };
 
 const CHILD_WORK_MESSAGES: MessageBlock[] = [
-  { id: "c1", label: "tool_use: read auth.ts", color: "bg-amber-500" },
-  { id: "c2", label: "tool_use: write test.ts", color: "bg-amber-500" },
+  { id: "c1", label: "tool_use: 读取 auth.ts", color: "bg-amber-500" },
+  { id: "c2", label: "tool_use: 写入 test.ts", color: "bg-amber-500" },
 ];
 
 const SUMMARY_BLOCK: MessageBlock = {
   id: "summary",
-  label: "summary: 3 tests written, all passing",
+  label: "summary: 已写完 3 个测试，全部通过",
   color: "bg-teal-500",
 };
 
 const STEPS = [
   {
-    title: "Parent Context",
+    title: "父上下文",
     description:
-      "The parent agent has accumulated messages from the conversation.",
+      "父 Agent 已经在主对话里积累了多条消息。",
   },
   {
-    title: "Spawn Subagent",
+    title: "创建子 Agent",
     description:
-      "Task tool creates a child with fresh messages[]. Only the task description is passed.",
+      "Task 工具会创建一个全新 messages[] 的子 Agent，只传递任务描述。",
   },
   {
-    title: "Independent Work",
+    title: "独立工作",
     description:
-      "The child has its own context. It doesn't see the parent's history.",
+      "子 Agent 拥有自己的上下文，看不到父 Agent 的历史消息。",
   },
   {
-    title: "Compress Result",
+    title: "压缩结果",
     description:
-      "The child's full conversation compresses into one summary.",
+      "子 Agent 的完整工作过程会被压缩成一条摘要。",
   },
   {
-    title: "Return Summary",
+    title: "返回摘要",
     description:
-      "Only the summary returns. The child's full context is discarded.",
+      "最终只把摘要返回给父 Agent，子 Agent 的完整上下文会被丢弃。",
   },
   {
-    title: "Clean Context",
+    title: "干净上下文",
     description:
-      "The parent gets a clean summary without context bloat. This is fresh-context isolation via messages[].",
+      "父 Agent 只接收干净摘要，不会引入上下文膨胀，这就是基于 messages[] 的上下文隔离。",
   },
 ];
 
@@ -104,7 +104,7 @@ export default function SubagentIsolation({ title }: { title?: string }) {
   return (
     <section className="space-y-4">
       <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-        {title || "Subagent Context Isolation"}
+        {title || "子 Agent 上下文隔离"}
       </h2>
 
       <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900"
@@ -117,7 +117,7 @@ export default function SubagentIsolation({ title }: { title?: string }) {
             <div className="mb-3 flex items-center gap-2">
               <div className="h-3 w-3 rounded-full bg-blue-500" />
               <span className="text-sm font-bold text-blue-700 dark:text-blue-300">
-                Parent Process
+                父进程
               </span>
             </div>
             <div className="mb-2 font-mono text-xs text-zinc-400">
@@ -146,7 +146,7 @@ export default function SubagentIsolation({ title }: { title?: string }) {
                 transition={{ delay: 0.5 }}
                 className="mt-3 rounded border border-blue-200 bg-white/60 px-2 py-1 text-center text-xs text-blue-600 dark:border-blue-700 dark:bg-blue-950/30 dark:text-blue-300"
               >
-                3 original + 1 summary = clean context
+                3 条原消息 + 1 条摘要 = 干净上下文
               </motion.div>
             )}
           </div>
@@ -195,11 +195,11 @@ export default function SubagentIsolation({ title }: { title?: string }) {
                       : "text-purple-700 dark:text-purple-300"
                 }`}
               >
-                Child Process
+                子进程
               </span>
             </div>
             <div className="mb-2 font-mono text-xs text-zinc-400">
-              messages[] (fresh)
+              messages[]（全新）
             </div>
 
             {showChildEmpty && (
@@ -209,7 +209,7 @@ export default function SubagentIsolation({ title }: { title?: string }) {
                 className="flex h-24 items-center justify-center rounded-lg border border-dashed border-zinc-200 dark:border-zinc-700"
               >
                 <span className="text-xs text-zinc-400">
-                  not yet spawned
+                  尚未创建
                 </span>
               </motion.div>
             )}
@@ -237,7 +237,7 @@ export default function SubagentIsolation({ title }: { title?: string }) {
                 animate={{ opacity: 1, scale: 1 }}
                 className="mt-3 rounded border border-amber-300 bg-amber-50 px-2 py-1 text-center text-xs text-amber-700 dark:border-amber-600 dark:bg-amber-900/20 dark:text-amber-300"
               >
-                Compressing full context into summary...
+                正在将完整上下文压缩为摘要...
               </motion.div>
             )}
 
@@ -247,7 +247,7 @@ export default function SubagentIsolation({ title }: { title?: string }) {
                 animate={{ opacity: 1 }}
                 className="mt-3 rounded border border-red-200 bg-red-50 px-2 py-1 text-center text-xs text-red-500 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400"
               >
-                context discarded
+                上下文已丢弃
               </motion.div>
             )}
           </div>
@@ -264,7 +264,7 @@ export default function SubagentIsolation({ title }: { title?: string }) {
                 style={{ zIndex: 10 }}
               >
                 <div className="rounded-lg bg-purple-500 px-3 py-1.5 text-xs font-medium text-white shadow-lg">
-                  task prompt
+                  任务提示
                 </div>
               </motion.div>
             )}
@@ -281,7 +281,7 @@ export default function SubagentIsolation({ title }: { title?: string }) {
                 style={{ zIndex: 10 }}
               >
                 <div className="rounded-lg bg-teal-500 px-3 py-1.5 text-xs font-medium text-white shadow-lg">
-                  summary
+                  摘要
                 </div>
               </motion.div>
             )}

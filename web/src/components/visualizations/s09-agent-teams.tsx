@@ -12,9 +12,9 @@ const AGENT_R = 40;
 
 // Agent positions: inverted triangle (Lead top-center, Coder bottom-left, Reviewer bottom-right)
 const AGENTS = [
-  { id: "lead", label: "Lead", cx: SVG_W / 2, cy: 70, inbox: "lead.jsonl" },
-  { id: "coder", label: "Coder", cx: 140, cy: 230, inbox: "coder.jsonl" },
-  { id: "reviewer", label: "Reviewer", cx: SVG_W - 140, cy: 230, inbox: "reviewer.jsonl" },
+  { id: "lead", label: "负责人", cx: SVG_W / 2, cy: 70, inbox: "lead.jsonl" },
+  { id: "coder", label: "开发", cx: 140, cy: 230, inbox: "coder.jsonl" },
+  { id: "reviewer", label: "评审", cx: SVG_W - 140, cy: 230, inbox: "reviewer.jsonl" },
 ] as const;
 
 // Inbox tray dimensions, positioned below each agent circle
@@ -37,13 +37,13 @@ function trayCenter(id: string) {
 
 // Step configuration
 const STEPS = [
-  { title: "The Team", desc: "Teams use a leader-worker pattern. Each teammate has a file-based mailbox inbox." },
-  { title: "Lead Assigns Work", desc: "Communication is async: write a message to the recipient's .jsonl inbox file." },
-  { title: "Read Inbox", desc: "Teammates poll their inbox before each LLM call. New messages become context." },
-  { title: "Independent Work", desc: "Each teammate runs its own agent loop independently." },
-  { title: "Pass Result", desc: "Results flow through the same mailbox mechanism. All communication is via files." },
-  { title: "Feedback Loop", desc: "The mailbox pattern supports any communication topology: linear, broadcast, round-robin." },
-  { title: "File-Based Coordination", desc: "No shared memory, no locks. All coordination through append-only files. Simple, robust, debuggable." },
+  { title: "团队结构", desc: "团队采用负责人-执行者模式，每个成员都有一个基于文件的邮箱 inbox。" },
+  { title: "负责人分派任务", desc: "通信是异步的：把消息写进接收方的 .jsonl inbox 文件即可。" },
+  { title: "读取邮箱", desc: "队友会在每次 LLM 调用前轮询自己的 inbox，新消息会变成上下文。" },
+  { title: "独立工作", desc: "每个队友都运行自己的 Agent 循环，彼此独立推进。" },
+  { title: "传递结果", desc: "结果仍然通过同一套邮箱机制回传，所有通信都通过文件完成。" },
+  { title: "反馈回路", desc: "邮箱模式支持多种通信拓扑：线性流、广播、轮转都可以实现。" },
+  { title: "文件化协作", desc: "没有共享内存，没有锁，所有协作都通过追加写文件完成，简单、稳健且易调试。" },
 ];
 
 // Helper: determine which agent glows at each step
@@ -139,7 +139,7 @@ export default function AgentTeams({ title }: { title?: string }) {
   return (
     <section className="space-y-4">
       <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-        {title || "Agent Team Mailboxes"}
+        {title || "Agent 团队邮箱"}
       </h2>
       <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-900 min-h-[500px]">
         <div className="flex flex-col lg:flex-row gap-4">
@@ -242,7 +242,7 @@ export default function AgentTeams({ title }: { title?: string }) {
                     team.config
                   </text>
                   <text x={20} y={40} fontSize={6} fontFamily="monospace" fill="#0369a1">
-                    workers: [coder, reviewer]
+                    成员: [coder, reviewer]
                   </text>
                 </motion.g>
               )}
@@ -256,7 +256,7 @@ export default function AgentTeams({ title }: { title?: string }) {
                     fromY={agentById("lead").cy + AGENT_R}
                     toX={agentById("coder").cx}
                     toY={agentById("coder").cy + TRAY_OFFSET_Y + TRAY_H / 2}
-                    label="task:login"
+                    label="任务:登录"
                   />
                 )}
               </AnimatePresence>
@@ -270,7 +270,7 @@ export default function AgentTeams({ title }: { title?: string }) {
                     fromY={agentById("coder").cy + TRAY_OFFSET_Y + TRAY_H / 2}
                     toX={agentById("coder").cx}
                     toY={agentById("coder").cy}
-                    label="task:login"
+                    label="任务:登录"
                   />
                 )}
               </AnimatePresence>
@@ -301,7 +301,7 @@ export default function AgentTeams({ title }: { title?: string }) {
                       fontSize={8}
                       fontWeight={600}
                     >
-                      result:done
+                      结果:完成
                     </text>
                   </motion.g>
                 )}
@@ -316,7 +316,7 @@ export default function AgentTeams({ title }: { title?: string }) {
                     fromY={agentById("coder").cy}
                     toX={agentById("reviewer").cx}
                     toY={agentById("reviewer").cy + TRAY_OFFSET_Y + TRAY_H / 2}
-                    label="result:done"
+                    label="结果:完成"
                   />
                 )}
               </AnimatePresence>
@@ -331,7 +331,7 @@ export default function AgentTeams({ title }: { title?: string }) {
                       fromY={agentById("reviewer").cy + TRAY_OFFSET_Y + TRAY_H / 2}
                       toX={agentById("reviewer").cx}
                       toY={agentById("reviewer").cy}
-                      label="result:done"
+                      label="结果:完成"
                       delay={0}
                     />
                     <TravelingMessage
@@ -340,7 +340,7 @@ export default function AgentTeams({ title }: { title?: string }) {
                       fromY={agentById("reviewer").cy}
                       toX={agentById("lead").cx}
                       toY={agentById("lead").cy + TRAY_OFFSET_Y + TRAY_H / 2}
-                      label="feedback"
+                      label="反馈"
                       delay={1.0}
                     />
                   </>

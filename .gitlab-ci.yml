@@ -1,0 +1,94 @@
+stages:
+  - builder
+  - alert_build
+  - deploy
+
+variables:
+  NODE_ENV: production
+  DEV_IMAGE: "${CI_REGISTRY}/${CI_REGISTRY_NAMESPACE}/${APP_NAME}"
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH
+
+default:
+  interruptible: true
+
+build_dev_docker:
+  stage: builder
+  rules:
+    - if: $CI_COMMIT_TAG =~ /.*dev/
+      when: always
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
+    - SAFE_TAG="$(printf '%s' "$CI_COMMIT_TAG" | tr '[:upper:]' '[:lower:]' | sed 's/[^0-9a-z._-]/-/g')"
+    - IMAGE="${DEV_IMAGE}:${SAFE_TAG}"
+    - docker build -t "${IMAGE}" -f Dockerfile .
+    - docker push "${IMAGE}"
+  environment:
+    name: dev
+
+dev_alert_fail_build:
+  stage: alert_build
+  rules:
+    - if: $CI_COMMIT_TAG =~ /.*dev/
+  environment:
+    name: dev
+  needs: ["build_dev_docker"]
+  when: on_failure
+  script:
+    - |
+      echo "${CI_COMMIT_MESSAGE}" > "test.${CI_PIPELINE_ID}.txt"
+      SAFE_TAG="$(printf '%s' "$CI_COMMIT_TAG" | tr '[:upper:]' '[:lower:]' | sed 's/[^0-9a-z._-]/-/g')"
+      IMAGE="${DEV_IMAGE}:${SAFE_TAG}"
+      COMMIT_MESSAGE="$(head -1 "test.${CI_PIPELINE_ID}.txt")"
+      curl -i \
+        -H "Accept: application/json" \
+        -H "Content-Type: application/json" \
+        -X POST \
+        --data "{\"msg_type\":\"interactive\",\"card\":{\"config\":{\"wide_screen_mode\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"${ALERT_TITLE} DEV构建失败\"},\"template\":\"red\"},\"elements\":[{\"tag\":\"markdown\",\"content\":\"**CI_COMMIT_SHA:** ${CI_COMMIT_SHA}\\n**CI_COMMIT_REF_NAME:** ${CI_COMMIT_REF_NAME}\\n**CI_PIPELINE_ID:** ${CI_PIPELINE_ID}\\n**CI_PROJECT_ID:** ${CI_PROJECT_ID}\\n**CI_PROJECT_PATH:** ${CI_PROJECT_PATH}\\n**CI_PROJECT_URL:** ${CI_PROJECT_URL}\\n**CI_COMMIT_AUTHOR:** ${CI_COMMIT_AUTHOR}\\n**CI_COMMIT_MESSAGE:** ${COMMIT_MESSAGE}\\n**GITLAB_USER_NAME:** ${GITLAB_USER_NAME}\\n**CI_COMMIT_TAG:** ${CI_COMMIT_TAG}\\n**CI_REGISTRY_IMAGE:** ${IMAGE}\"}]}}" \
+        "${DEV_ALERT_WEBHOOK}"
+
+dev_alert_success_build:
+  stage: alert_build
+  rules:
+    - if: $CI_COMMIT_TAG =~ /.*dev/
+  environment:
+    name: dev
+  needs: ["build_dev_docker"]
+  when: on_success
+  script:
+    - |
+      echo "${CI_COMMIT_MESSAGE}" > "test.${CI_PIPELINE_ID}.txt"
+      SAFE_TAG="$(printf '%s' "$CI_COMMIT_TAG" | tr '[:upper:]' '[:lower:]' | sed 's/[^0-9a-z._-]/-/g')"
+      IMAGE="${DEV_IMAGE}:${SAFE_TAG}"
+      COMMIT_MESSAGE="$(head -1 "test.${CI_PIPELINE_ID}.txt")"
+      curl -i \
+        -H "Accept: application/json" \
+        -H "Content-Type: application/json" \
+        -X POST \
+        --data "{\"msg_type\":\"interactive\",\"card\":{\"config\":{\"wide_screen_mode\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"${ALERT_TITLE} DEV构建成功\"},\"template\":\"green\"},\"elements\":[{\"tag\":\"markdown\",\"content\":\"**CI_COMMIT_SHA:** ${CI_COMMIT_SHA}\\n**CI_COMMIT_REF_NAME:** ${CI_COMMIT_REF_NAME}\\n**CI_PIPELINE_ID:** ${CI_PIPELINE_ID}\\n**CI_PROJECT_ID:** ${CI_PROJECT_ID}\\n**CI_PROJECT_PATH:** ${CI_PROJECT_PATH}\\n**CI_PROJECT_URL:** ${CI_PROJECT_URL}\\n**CI_COMMIT_AUTHOR:** ${CI_COMMIT_AUTHOR}\\n**CI_COMMIT_MESSAGE:** ${COMMIT_MESSAGE}\\n**GITLAB_USER_NAME:** ${GITLAB_USER_NAME}\\n**CI_COMMIT_TAG:** ${CI_COMMIT_TAG}\\n**CI_REGISTRY_IMAGE:** ${IMAGE}\"}]}}" \
+        "${DEV_ALERT_WEBHOOK}"
+
+deploy_dev:
+  stage: deploy
+  rules:
+    - if: $CI_COMMIT_TAG =~ /.*dev/
+      when: on_success
+  needs: ["build_dev_docker"]
+  script:
+    - SAFE_TAG="$(printf '%s' "$CI_COMMIT_TAG" | tr '[:upper:]' '[:lower:]' | sed 's/[^0-9a-z._-]/-/g')"
+    - mkdir -p "manifests/rendered/${CI_ENVIRONMENT_SLUG}"
+    - cp manifests/dev/deployment.yaml "manifests/rendered/${CI_ENVIRONMENT_SLUG}/deployment.yaml"
+    - cp manifests/dev/service.yaml "manifests/rendered/${CI_ENVIRONMENT_SLUG}/service.yaml"
+    - sed -i "s/__CI_ENVIRONMENT_SLUG__/${CI_ENVIRONMENT_SLUG}/g" "manifests/rendered/${CI_ENVIRONMENT_SLUG}/deployment.yaml"
+    - sed -i "s/__TAG__/${SAFE_TAG}/g" "manifests/rendered/${CI_ENVIRONMENT_SLUG}/deployment.yaml"
+    - sed -i "s@__IMAGE__@${DEV_IMAGE}@g" "manifests/rendered/${CI_ENVIRONMENT_SLUG}/deployment.yaml"
+    - sed -i "s@__DEV_NAMESPACE__@${DEV_NAMESPACE}@g" "manifests/rendered/${CI_ENVIRONMENT_SLUG}/deployment.yaml"
+    - sed -i "s@__DEV_NAMESPACE__@${DEV_NAMESPACE}@g" "manifests/rendered/${CI_ENVIRONMENT_SLUG}/service.yaml"
+    - kubectl --kubeconfig "${CD_KUBE_DEV_CONFIG}" apply -f "manifests/rendered/${CI_ENVIRONMENT_SLUG}/service.yaml"
+    - kubectl --kubeconfig "${CD_KUBE_DEV_CONFIG}" apply -f "manifests/rendered/${CI_ENVIRONMENT_SLUG}/deployment.yaml"
+    - kubectl --kubeconfig "${CD_KUBE_DEV_CONFIG}" rollout status -f "manifests/rendered/${CI_ENVIRONMENT_SLUG}/deployment.yaml"
+  environment:
+    name: dev

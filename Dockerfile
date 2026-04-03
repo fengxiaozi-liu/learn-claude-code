@@ -1,13 +1,17 @@
-FROM python:3.12-slim
-
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+FROM harbor.linksoft.cn/base/node:22.3.0 AS web-builder
 
 WORKDIR /app
 
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+COPY web/package.json web/package-lock.json ./web/
+RUN cd web && npm ci
 
 COPY . .
+RUN cd web && npm run build
 
-CMD ["python", "agents/s_full.py"]
+FROM harbor.linksoft.cn/base/nginx:1.20-alpine
+
+COPY --from=web-builder /app/web/out /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

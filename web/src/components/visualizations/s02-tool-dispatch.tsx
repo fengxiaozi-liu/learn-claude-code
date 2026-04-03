@@ -19,7 +19,7 @@ interface ToolDef {
 const TOOLS: ToolDef[] = [
   {
     name: "bash",
-    desc: "Execute shell commands",
+    desc: "执行 Shell 命令",
     color: "border-orange-300 bg-orange-50",
     activeColor: "border-orange-500 bg-orange-100 ring-2 ring-orange-400",
     darkColor: "dark:border-zinc-700 dark:bg-zinc-800/50",
@@ -27,7 +27,7 @@ const TOOLS: ToolDef[] = [
   },
   {
     name: "read_file",
-    desc: "Read file contents",
+    desc: "读取文件内容",
     color: "border-sky-300 bg-sky-50",
     activeColor: "border-sky-500 bg-sky-100 ring-2 ring-sky-400",
     darkColor: "dark:border-zinc-700 dark:bg-zinc-800/50",
@@ -35,7 +35,7 @@ const TOOLS: ToolDef[] = [
   },
   {
     name: "write_file",
-    desc: "Create or overwrite a file",
+    desc: "创建或覆盖文件",
     color: "border-emerald-300 bg-emerald-50",
     activeColor: "border-emerald-500 bg-emerald-100 ring-2 ring-emerald-400",
     darkColor: "dark:border-zinc-700 dark:bg-zinc-800/50",
@@ -43,7 +43,7 @@ const TOOLS: ToolDef[] = [
   },
   {
     name: "edit_file",
-    desc: "Apply targeted edits",
+    desc: "执行定点修改",
     color: "border-violet-300 bg-violet-50",
     activeColor: "border-violet-500 bg-violet-100 ring-2 ring-violet-400",
     darkColor: "dark:border-zinc-700 dark:bg-zinc-800/50",
@@ -66,12 +66,12 @@ const REQUEST_PER_STEP: (string | null)[] = [
 
 // Step annotations
 const STEP_INFO = [
-  { title: "The Dispatch Map", desc: "A dictionary maps tool names to handler functions. The loop code never changes." },
-  { title: "Route: bash", desc: "tool_call.name -> handlers['bash'](input). Name-based routing." },
-  { title: "Route: read_file", desc: "Same pattern, different handler. Validate input, execute, return result." },
-  { title: "Route: write_file", desc: "Every tool returns a tool_result that goes back into messages[]." },
-  { title: "Route: edit_file", desc: "Adding a new tool = adding one entry to the dispatch map." },
-  { title: "The Key Insight", desc: "The while loop stays the same. You only grow the dispatch map. That's it." },
+  { title: "分发表", desc: "一个字典把工具名映射到处理函数，循环代码本身完全不变。" },
+  { title: "路由到 bash", desc: "tool_call.name -> handlers['bash'](input)，按名称分发。" },
+  { title: "路由到 read_file", desc: "模式相同，只是处理器不同，先校验再执行再返回。" },
+  { title: "路由到 write_file", desc: "每个工具都会返回一个 tool_result，再写回 messages[]。" },
+  { title: "路由到 edit_file", desc: "新增一个工具，本质上就是在分发表里多加一项。" },
+  { title: "关键结论", desc: "while 循环无需修改，你只是在扩展 dispatch map。" },
 ];
 
 // SVG layout constants
@@ -112,14 +112,14 @@ export default function ToolDispatch({ title }: { title?: string }) {
   return (
     <section className="min-h-[500px] space-y-4">
       <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-        {title || "Tool Dispatch Map"}
+        {title || "工具分发表"}
       </h2>
 
       <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-900">
         {/* Incoming request display */}
         <div className="mb-4 flex min-h-[32px] items-center gap-2">
           <span className="shrink-0 text-xs font-medium text-zinc-500 dark:text-zinc-400">
-            Incoming:
+            输入请求:
           </span>
           <AnimatePresence mode="wait">
             {request && (
@@ -141,7 +141,7 @@ export default function ToolDispatch({ title }: { title?: string }) {
                 animate={{ opacity: 0.6 }}
                 className="text-xs text-zinc-400 dark:text-zinc-600"
               >
-                waiting for tool_call...
+                等待 tool_call...
               </motion.span>
             )}
             {isAllActive && (
@@ -151,7 +151,7 @@ export default function ToolDispatch({ title }: { title?: string }) {
                 animate={{ opacity: 1 }}
                 className="text-xs font-medium text-emerald-600 dark:text-emerald-400"
               >
-                All routes active
+                全部路由已激活
               </motion.span>
             )}
           </AnimatePresence>

@@ -18,12 +18,12 @@ interface FlowNode {
 }
 
 const NODES: FlowNode[] = [
-  { id: "start", label: "Start", x: 160, y: 30, w: 120, h: 40, type: "rect" },
-  { id: "api_call", label: "API Call", x: 160, y: 110, w: 120, h: 40, type: "rect" },
+  { id: "start", label: "开始", x: 160, y: 30, w: 120, h: 40, type: "rect" },
+  { id: "api_call", label: "调用模型", x: 160, y: 110, w: 120, h: 40, type: "rect" },
   { id: "check", label: "stop_reason?", x: 160, y: 200, w: 140, h: 50, type: "diamond" },
-  { id: "execute", label: "Execute Tool", x: 160, y: 300, w: 120, h: 40, type: "rect" },
-  { id: "append", label: "Append Result", x: 160, y: 380, w: 120, h: 40, type: "rect" },
-  { id: "end", label: "Break / Done", x: 380, y: 200, w: 120, h: 40, type: "rect" },
+  { id: "execute", label: "执行工具", x: 160, y: 300, w: 120, h: 40, type: "rect" },
+  { id: "append", label: "追加结果", x: 160, y: 380, w: 120, h: 40, type: "rect" },
+  { id: "end", label: "结束", x: 380, y: 200, w: 120, h: 40, type: "rect" },
 ];
 
 // Edges between nodes (SVG path data computed inline)
@@ -74,27 +74,27 @@ interface MessageBlock {
 
 const MESSAGES_PER_STEP: (MessageBlock | null)[][] = [
   [],
-  [{ role: "user", detail: "Fix the login bug", colorClass: "bg-blue-500 dark:bg-blue-600" }],
+  [{ role: "user", detail: "修复登录缺陷", colorClass: "bg-blue-500 dark:bg-blue-600" }],
   [],
   [{ role: "assistant", detail: "tool_use: read_file", colorClass: "bg-zinc-600 dark:bg-zinc-500" }],
-  [{ role: "tool_result", detail: "auth.ts contents...", colorClass: "bg-emerald-500 dark:bg-emerald-600" }],
+  [{ role: "tool_result", detail: "auth.ts 文件内容...", colorClass: "bg-emerald-500 dark:bg-emerald-600" }],
   [
     { role: "assistant", detail: "tool_use: edit_file", colorClass: "bg-zinc-600 dark:bg-zinc-500" },
-    { role: "tool_result", detail: "file updated", colorClass: "bg-emerald-500 dark:bg-emerald-600" },
+    { role: "tool_result", detail: "文件已更新", colorClass: "bg-emerald-500 dark:bg-emerald-600" },
   ],
-  [{ role: "assistant", detail: "end_turn: Done!", colorClass: "bg-purple-500 dark:bg-purple-600" }],
+  [{ role: "assistant", detail: "end_turn: 完成", colorClass: "bg-purple-500 dark:bg-purple-600" }],
 ];
 
 // -- Step annotations --
 
 const STEP_INFO = [
-  { title: "The While Loop", desc: "Every agent is a while loop that keeps calling the model until it says 'stop'." },
-  { title: "User Input", desc: "The loop starts when the user sends a message." },
-  { title: "Call the Model", desc: "Send all messages to the LLM. It sees everything and decides what to do." },
-  { title: "stop_reason: tool_use", desc: "The model wants to use a tool. The loop continues." },
-  { title: "Execute & Append", desc: "Run the tool, append the result to messages[]. Feed it back." },
-  { title: "Loop Again", desc: "Same code path, second iteration. The model decides to edit a file." },
-  { title: "stop_reason: end_turn", desc: "The model is done. Loop exits. That's the entire agent." },
+  { title: "While 循环", desc: "每个 Agent 本质上都是一个循环，不断调用模型直到它决定停止。" },
+  { title: "用户输入", desc: "循环从用户发送第一条消息开始。" },
+  { title: "调用模型", desc: "把全部消息发送给 LLM，由它决定下一步做什么。" },
+  { title: "stop_reason: tool_use", desc: "模型决定调用工具，因此循环继续。" },
+  { title: "执行并追加", desc: "执行工具，把结果追加回 messages[]，再喂给模型。" },
+  { title: "再次循环", desc: "还是同一段代码路径，只是进入第二轮执行。" },
+  { title: "stop_reason: end_turn", desc: "模型已经完成，循环退出，这就是整个 Agent。" },
 ];
 
 // -- Helpers --
@@ -163,7 +163,7 @@ export default function AgentLoop({ title }: { title?: string }) {
   return (
     <section className="min-h-[500px] space-y-4">
       <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-        {title || "The Agent While-Loop"}
+        {title || "Agent While-Loop"}
       </h2>
 
       <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-900">
@@ -344,7 +344,7 @@ export default function AgentLoop({ title }: { title?: string }) {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                 >
-                  iter #2
+                  第 2 轮
                 </motion.text>
               )}
             </svg>
@@ -365,7 +365,7 @@ export default function AgentLoop({ title }: { title?: string }) {
                     exit={{ opacity: 0 }}
                     className="py-8 text-center text-xs text-zinc-400 dark:text-zinc-600"
                   >
-                    [ empty ]
+                    [ 空 ]
                   </motion.div>
                 )}
                 {visibleMessages.map((msg, i) => (
